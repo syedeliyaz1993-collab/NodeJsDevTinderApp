@@ -106,14 +106,41 @@ const app = express();
 //Middleware means a function which has access to the request and response object and can modify them. 
 // It can also end the request-response cycle or call the next middleware in the stack.
 
-app.use("/user",
-    (req, res, next) => {
-        console.log("Middleware 1");//This is a middleware function
-        next();
-    },
-    (req, res) => {
-        console.log("Middleware 2");
-        res.send("Hello World from middleware 2!");//This is a route handler function
+// app.use("/user",
+//     (req, res, next) => {
+//         console.log("Middleware 1");//This is a middleware function
+//         next();
+//     },
+//     (req, res) => {
+//         console.log("Middleware 2");
+//         res.send("Hello World from middleware 2!");//This is a route handler function
+//     }
+// );  
+
+//Actual Middle ware function which can be used in multiple routes
+//Now this is an middle ware function which can be used for multiple routes and can be used to check authentication or authorization of user
+app.use("/admin", (req, res, next) => {
+    console.log("Middleware for admin route");//This is a middleware function
+
+    const token = 'abcdefge';
+    const isAuthenticated = token === 'abcdefg'; // Simulating authentication check
+
+    if (isAuthenticated) {
+        next(); // User is authenticated, proceed to the next middleware or route handler
+    } else {
+        res.status(401).send("Unauthorized access"); // User is not authenticated, send an error response
     }
-);  
+
+});
+
+app.get("/admin/getData", (req, res) => {
+    console.log("Admin route handler");
+    res.send("Hello Admin! You are authenticated.");
+});
+
+app.delete("/admin/deleteData", (req, res) => {
+    console.log("Admin delete route handler");
+    res.send("Admin delete action performed.");
+});
+
 app.listen(3000);
