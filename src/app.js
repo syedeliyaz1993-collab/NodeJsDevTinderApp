@@ -119,18 +119,15 @@ const app = express();
 
 //Actual Middle ware function which can be used in multiple routes
 //Now this is an middle ware function which can be used for multiple routes and can be used to check authentication or authorization of user
-app.use("/admin", (req, res, next) => {
-    console.log("Middleware for admin route");//This is a middleware function
 
-    const token = 'abcdefge';
-    const isAuthenticated = token === 'abcdefg'; // Simulating authentication check
+const { adminAuth, userAuth } = require("./middlewares/Auth");
+app.use("/admin", adminAuth);
 
-    if (isAuthenticated) {
-        next(); // User is authenticated, proceed to the next middleware or route handler
-    } else {
-        res.status(401).send("Unauthorized access"); // User is not authenticated, send an error response
-    }
+//app.use("/user", userAuth);
 
+app.get("/user/getData", userAuth, (req, res) => {
+    console.log("User route handler");
+    res.send("Hello User! You are authenticated.");
 });
 
 app.get("/admin/getData", (req, res) => {
