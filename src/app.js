@@ -83,18 +83,18 @@ const app = express();
 // );
 
 //Will get error here as we are sending response in 1st route handler and calling next() to go to next route handler
-app.use("/user",
-    (req, res, next) => {
-        console.log("Middleware 1");
-        next();
-        res.send("Hello World from Express 1!");
-    },
-    (req, res) => {
-        console.log("Middleware 2");
-        res.send("Hello World from Express 2!");
-    }
-    //Error is => Cannot set headers after they are sent to the client
-);
+// app.use("/user",
+//     (req, res, next) => {
+//         console.log("Middleware 1");
+//         next();
+//         res.send("Hello World from Express 1!");
+//     },
+//     (req, res) => {
+//         console.log("Middleware 2");
+//         res.send("Hello World from Express 2!");
+//     }
+//     //Error is => Cannot set headers after they are sent to the client
+// );
 /**
  * Route handlers can be passed as an array or as a list of arguments
  * app.use("route", rh1, rh2 ,rh3);
@@ -102,4 +102,18 @@ app.use("/user",
  * app.use("route", [rh1, rh2 ,rh3]);
  * app.use("route", rh1, [rh2] ,rh3);
  */
+
+//Middleware means a function which has access to the request and response object and can modify them. 
+// It can also end the request-response cycle or call the next middleware in the stack.
+
+app.use("/user",
+    (req, res, next) => {
+        console.log("Middleware 1");//This is a middleware function
+        next();
+    },
+    (req, res) => {
+        console.log("Middleware 2");
+        res.send("Hello World from middleware 2!");//This is a route handler function
+    }
+);  
 app.listen(3000);
