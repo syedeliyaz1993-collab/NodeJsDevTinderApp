@@ -4,38 +4,102 @@ const app = express();
 
 ///Route params and dynamic routing
 
-app.get("/user", (req, res) => {
-    console.log(req.query);
-    res.send({
-        "fName" : "syed",
-        "lName": "Eshaan"
-    });
-});
-app.get("/user/:userId", (req, res) => {
-    console.log(req.params);
-    res.send({
-        "fName" : "syed",
-        "lName": "Eshaan"
-    });
-});
+// app.get("/user", (req, res) => {
+//     console.log(req.query);
+//     res.send({
+//         "fName" : "syed",
+//         "lName": "Eshaan"
+//     });
+// });
+// app.get("/user/:userId", (req, res) => {
+//     console.log(req.params);
+//     res.send({
+//         "fName" : "syed",
+//         "lName": "Eshaan"
+//     });
+// });
 
 
-app.post("/user", (req, res) => {
-    res.send("Data saved successfully");
-});
+// app.post("/user", (req, res) => {
+//     res.send("Data saved successfully");
+// });
 
 
-app.delete("/user", (req, res) => {
-    res.send("User deleted successfully");
-});
+// app.delete("/user", (req, res) => {
+//     res.send("User deleted successfully");
+// });
 
 
 
 
-app.use('/express', (req, res) => {
-    res.send("Hello World from Express!");
-});
-app.use("/", (req, res) => {
-    res.send("Am From Namaste Node Js !");
-});
+// app.use('/express', (req, res) => {
+//     res.send("Hello World from Express!");
+// });
+// app.use("/", (req, res) => {
+//     res.send("Am From Namaste Node Js !");
+// });
+
+
+//**
+// One route can have multiple route handlers
+//  */
+
+
+
+// app.use("/user",
+//     (req, res) => {
+//         console.log("Middleware 1");
+//         res.send("Hello World from Express 1!");
+//     },
+//     (req, res) => {
+//         console.log("Middleware 2");
+//         res.send("Hello World from Express!");
+//     }
+// )
+
+//Infinite Loop in middleware
+// app.use("/user",
+//     (req, res) => {
+//         console.log("Middleware 1");
+//         //res.send("Hello World from Express 1!");
+//     },
+//     (req, res) => {
+//         console.log("Middleware 2");
+//         res.send("Hello World from Express!");
+//     }
+// )
+
+//2nd response will print as we dont have res in 1st route handler and we are calling next() to go to next route handler
+// app.use("/user",
+//     (req, res, next) => {
+//         console.log("Middleware 1");
+//         //res.send("Hello World from Express 1!");
+//         next();
+//     },
+//     (req, res) => {
+//         console.log("Middleware 2");
+//         res.send("Hello World from Express 2!");
+//     }
+// );
+
+//Will get error here as we are sending response in 1st route handler and calling next() to go to next route handler
+app.use("/user",
+    (req, res, next) => {
+        console.log("Middleware 1");
+        next();
+        res.send("Hello World from Express 1!");
+    },
+    (req, res) => {
+        console.log("Middleware 2");
+        res.send("Hello World from Express 2!");
+    }
+    //Error is => Cannot set headers after they are sent to the client
+);
+/**
+ * Route handlers can be passed as an array or as a list of arguments
+ * app.use("route", rh1, rh2 ,rh3);
+ * app.use("route", rh1, [rh2 ,rh3]);
+ * app.use("route", [rh1, rh2 ,rh3]);
+ * app.use("route", rh1, [rh2] ,rh3);
+ */
 app.listen(3000);
