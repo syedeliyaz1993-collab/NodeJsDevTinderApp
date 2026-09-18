@@ -2,8 +2,17 @@ const express = require("express");
 const app = express();
 
 
+///Route params and dynamic routing
 
 app.get("/user", (req, res) => {
+    console.log(req.query);
+    res.send({
+        "fName" : "syed",
+        "lName": "Eshaan"
+    });
+});
+app.get("/user/:userId", (req, res) => {
+    console.log(req.params);
     res.send({
         "fName" : "syed",
         "lName": "Eshaan"
