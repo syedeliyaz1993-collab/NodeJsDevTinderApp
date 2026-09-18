@@ -149,6 +149,8 @@ app.get("/user/getData", (req, res) => {
    throw new Error("User route error");
 });
 
+
+//always keep error handling middleware at the end of all route handlers and middlewares
 app.use("/",(err, req, res, next) => {
     if(err) {
         res.status(500).send('Something broke!');
