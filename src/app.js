@@ -120,24 +120,39 @@ const app = express();
 //Actual Middle ware function which can be used in multiple routes
 //Now this is an middle ware function which can be used for multiple routes and can be used to check authentication or authorization of user
 
-const { adminAuth, userAuth } = require("./middlewares/Auth");
-app.use("/admin", adminAuth);
+// const { adminAuth, userAuth } = require("./middlewares/Auth");
+// app.use("/admin", adminAuth);
 
-//app.use("/user", userAuth);
+// //app.use("/user", userAuth);
 
-app.get("/user/getData", userAuth, (req, res) => {
-    console.log("User route handler");
-    res.send("Hello User! You are authenticated.");
+// app.get("/user/getData", userAuth, (req, res) => {
+//     console.log("User route handler");
+//     res.send("Hello User! You are authenticated.");
+// });
+
+// app.get("/admin/getData", (req, res) => {
+//     console.log("Admin route handler");
+//     res.send("Hello Admin! You are authenticated.");
+// });
+
+// app.delete("/admin/deleteData", (req, res) => {
+//     console.log("Admin delete route handler");
+//     res.send("Admin delete action performed.");
+// });
+
+//Error handling middleware function
+
+
+app.get("/user/getData", (req, res) => {
+   
+   
+   throw new Error("User route error");
 });
 
-app.get("/admin/getData", (req, res) => {
-    console.log("Admin route handler");
-    res.send("Hello Admin! You are authenticated.");
-});
-
-app.delete("/admin/deleteData", (req, res) => {
-    console.log("Admin delete route handler");
-    res.send("Admin delete action performed.");
+app.use("/",(err, req, res, next) => {
+    if(err) {
+        res.status(500).send('Something broke!');
+    }
 });
 
 app.listen(3000);
