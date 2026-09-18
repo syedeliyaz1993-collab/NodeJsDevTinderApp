@@ -1,0 +1,19 @@
+{
+  "name": "devtinder_backend",
+  "version": "1.0.0",
+  "description": "DevTinder NodeJs",
+  "keywords": [
+    "NodeJs",
+    "JS"
+  ],
+  "license": "ISC",
+  "author": "Syed Eliyaz",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start" : "nodemon src/app.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
