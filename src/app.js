@@ -174,6 +174,32 @@ app.post("/signUp", async (req, res) => {
         res.status(500).send("Error signing up user");
     }
 });
+//Get the user with emailId from the database and send them as a JSON response
+app.get("/users", async (req, res) => {
+
+    const userEmailId = req.body.emailId;
+    try {
+        const users = await User.find({ emailId: userEmailId }); // Fetch users from the database based on emailId
+        if (users.length === 0) {
+            return res.status(404).send("No users found with the provided emailId");
+        }
+        res.json(users); // Send the fetched users as a JSON response
+    } catch (err) {
+        console.error("Error fetching users:", err.message);
+        res.status(500).send("Error fetching users");
+    }
+});
+
+//Get all users from the database and send them as a JSON response
+app.get("/feed", async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch all users from the database   
+        res.json(users); // Send the fetched users as a JSON response   
+    } catch (err) {
+        console.error("Error fetching users:", err.message);
+        res.status(500).send("Error fetching users");
+    }
+});
 
 //Exported and Imported the ConnectDB fn
 //At first it connect to Db
