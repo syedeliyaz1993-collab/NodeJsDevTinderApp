@@ -201,6 +201,20 @@ app.get("/feed", async (req, res) => {
     }
 });
 
+app.delete("/deleteUser", async (req, res) => {
+    const userId = req.body.userId;
+    try {
+        const deletedUser = await User.findByIdAndDelete(userId); // Delete the user from the database based on userId
+        if (!deletedUser) {
+            return res.status(404).send("User not found");
+        }
+        res.send("User deleted successfully");
+    } catch (err) {
+        console.error("Error deleting user:", err.message);
+        res.status(500).send("Error deleting user");
+    }
+});
+
 //Exported and Imported the ConnectDB fn
 //At first it connect to Db
 //Then it starts the server
