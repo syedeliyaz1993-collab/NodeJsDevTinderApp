@@ -160,18 +160,11 @@ const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
 
-
+app.use(express.json()); // Middleware to parse JSON request bodies
 app.post("/signUp", async (req, res) => {
 
     //Create a new instance for USer model
-    const user = new User({
-        firstName: "MahendraSingh",
-        lastName: "Dhoni",
-        emailId: "test123@gmail.com",
-        password: "test123",
-        age: 42,
-        gender: "Male"
-    });
+    const user = new User(req.body);
     //Always use try & catch for handling DB operations as they are async in nature and can throw errors
     try {
         await user.save(); // Save the user to the database  
