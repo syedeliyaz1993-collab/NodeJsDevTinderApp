@@ -143,18 +143,56 @@ const app = express();
 //Error handling middleware function
 
 
-app.get("/user/getData", (req, res) => {
-   
-   
-   throw new Error("User route error");
-});
+// app.get("/user/getData", (req, res) => {
 
 
-//always keep error handling middleware at the end of all route handlers and middlewares
-app.use("/",(err, req, res, next) => {
-    if(err) {
-        res.status(500).send('Something broke!');
+//    throw new Error("User route error");
+// });
+
+
+// //always keep error handling middleware at the end of all route handlers and middlewares
+// app.use("/",(err, req, res, next) => {
+//     if(err) {
+//         res.status(500).send('Something broke!');
+//     }
+// });
+
+const connectDB = require("./config/database");
+const User = require("./models/user");
+
+
+app.post("/signUp", async (req, res) => {
+
+    //Create a new instance for USer model
+    const user = new User({
+        firstName: "MahendraSingh",
+        lastName: "Dhoni",
+        emailId: "test123@gmail.com",
+        password: "test123",
+        age: 42,
+        gender: "Male"
+    });
+    //Always use try & catch for handling DB operations as they are async in nature and can throw errors
+    try {
+        await user.save(); // Save the user to the database  
+        res.send("User signed up successfully");
+    } catch (err) {
+        console.error("Error saving user:", err.message);
+        res.status(500).send("Error signing up user");
     }
 });
 
-app.listen(3000);
+//Exported and Imported the ConnectDB fn
+//At first it connect to Db
+//Then it starts the server
+connectDB().then(() => {
+    console.log("Database connected successfully");
+    app.listen(3000, () => {
+        console.log("Server is running on port 3000");
+    });
+}).catch((err) => {
+    console.error("Database connection failed:", err.message);
+    process.exit(1);
+});
+
+//app.listen(3000);
