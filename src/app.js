@@ -171,7 +171,7 @@ app.post("/signUp", async (req, res) => {
         res.send("User signed up successfully");
     } catch (err) {
         console.error("Error saving user:", err.message);
-        res.status(500).send("Error signing up user");
+        res.status(400).json({ error: err.message });
     }
 });
 //Get the user with emailId from the database and send them as a JSON response
