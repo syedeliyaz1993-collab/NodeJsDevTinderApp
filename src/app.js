@@ -206,10 +206,10 @@ app.post("/login", async (req, res) => {
         }
 
         //Now decrypt the password and check if it matches with the password in DB
-        const isPasswordMatch = await bcrypt.compare(password, isUseExist.password);
+        const isPasswordMatch = await isUserExist.validatePassword(password); // Call the instance method to validate the password
         if (isPasswordMatch) {
 
-            const jwtToken = jwt.sign({ _id: isUseExist._id }, "mysecretkey", {expiresIn: "1d"}); //
+            const jwtToken = await isUseExist.getJWT();
 
             res.cookie("token", jwtToken); // Seting  a Dynamic cookie named "token"
 
