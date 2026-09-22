@@ -177,7 +177,7 @@ app.post("/signUp", async (req, res) => {
 
     //Create a new instance for USer model & Now send the fields to User Model Instead
     //Of sending req.body directly
-    const user = new User({firstName, lastName, emailId, password: passwordHash}); // Create a new user instance with the hashed password
+    const user = new User({ firstName, lastName, emailId, password: passwordHash }); // Create a new user instance with the hashed password
 
 
     //Always use try & catch for handling DB operations as they are async in nature and can throw errors
@@ -192,31 +192,73 @@ app.post("/signUp", async (req, res) => {
 
 ///Login API 
 
+const jwt = require("jsonwebtoken");
 app.post("/login", async (req, res) => {
 
-try {
-//Get the user credentails which they trued to enter to login 
+    try {
+        //Get the user credentails which they trued to enter to login 
 
-const { emailId, password } = req.body;
-//Now check the email is exist in our DB 
-const isUseExist = await User.findOne({ emailId: emailId });
-if(!isUseExist) {
-    throw new Error("User not found with the provided emailId");
-}
+        const { emailId, password } = req.body;
+        //Now check the email is exist in our DB 
+        const isUseExist = await User.findOne({ emailId: emailId });
+        if (!isUseExist) {
+            throw new Error("User not found with the provided emailId");
+        }
 
-//Now decrypt the password and check if it matches with the password in DB
-const isPasswordMatch = await bcrypt.compare(password, isUseExist.password);
-if(isPasswordMatch) {
-    res.send("User logged in successfully");
-} else {
-    throw new Error("Invalid password");
-}
+        //Now decrypt the password and check if it matches with the password in DB
+        const isPasswordMatch = await bcrypt.compare(password, isUseExist.password);
+        if (isPasswordMatch) {
 
-     
-}catch (err) {
-    console.error("Error saving user:", err.message);
+            const jwtToken = jwt.sign({ _id: isUseExist._id }, "mysecretkey"); //
+
+            res.cookie("token", jwtToken); // Seting  a Dynamic cookie named "token"
+
+            res.send("User logged in successfully");
+        } else {
+            throw new Error("Invalid password");
+        }
+
+
+    } catch (err) {
+        console.error("Error saving user:", err.message);
         res.status(400).send('ERROR : ' + err.message);
-}
+    }
+
+});
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser()); // Middleware to parse cookies from incoming requests
+
+app.get("/profile", async (req, res) => {
+
+    try {
+
+        const cookie = req.cookies;
+
+        console.log("Cookie : ", cookie);
+        //Check if the cookie is present and has a token and handling the error if not present
+        if (!cookie || !cookie.token) {
+            throw new Error("No token found in cookies");
+        }
+        //Now verify the token and get the user id from it and then fetch the user from the DB
+        //With the help of JWT verify method we can decode the token and get the user id from it and then fetch the user from the DB
+        const decodedMsg = await jwt.verify(cookie.token, "mysecretkey");
+        console.log("Decoded Msg : ", decodedMsg);
+
+        const user = await User.findById(decodedMsg._id);
+
+
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        res.send(user);
+        
+    } catch (err) {
+        console.error("Error saving user:", err.message);
+        res.status(400).send('ERROR : ' + err.message);
+    }
+
 
 })
 
