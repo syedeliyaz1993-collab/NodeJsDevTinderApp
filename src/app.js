@@ -209,7 +209,7 @@ app.post("/login", async (req, res) => {
         const isPasswordMatch = await bcrypt.compare(password, isUseExist.password);
         if (isPasswordMatch) {
 
-            const jwtToken = jwt.sign({ _id: isUseExist._id }, "mysecretkey"); //
+            const jwtToken = jwt.sign({ _id: isUseExist._id }, "mysecretkey", {expiresIn: "1d"}); //
 
             res.cookie("token", jwtToken); // Seting  a Dynamic cookie named "token"
 
@@ -228,39 +228,23 @@ app.post("/login", async (req, res) => {
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser()); // Middleware to parse cookies from incoming requests
-
-app.get("/profile", async (req, res) => {
-
+const { userAuth } = require("./middlewares/Auth");
+app.get("/profile", userAuth, async (req, res) => {
     try {
-
-        const cookie = req.cookies;
-
-        //console.log("Cookie : ", cookie);
-        //Check if the cookie is present and has a token and handling the error if not present
-        if (!cookie || !cookie.token) {
-            throw new Error("No token found in cookies");
-        }
-        //Now verify the token and get the user id from it and then fetch the user from the DB
-        //With the help of JWT verify method we can decode the token and get the user id from it and then fetch the user from the DB
-        const decodedMsg = await jwt.verify(cookie.token, "mysecretkey");
-        //console.log("Decoded Msg : ", decodedMsg);
-
-        const user = await User.findById(decodedMsg._id);
-
-
-        if (!user) {
-            throw new Error("User not found");
-        }
-
+        const user = req.user; // Access the authenticated user from the request object
         res.send(user);
 
     } catch (err) {
         console.error("Error saving user:", err.message);
         res.status(400).send('ERROR : ' + err.message);
     }
+});
 
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+    const user = req.user; // Access the authenticated user from the request object
 
-})
+    res.send(user.firstName + " " + "Sent Connection request sent successfully");
+});
 
 
 
