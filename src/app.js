@@ -235,7 +235,7 @@ app.get("/profile", async (req, res) => {
 
         const cookie = req.cookies;
 
-        console.log("Cookie : ", cookie);
+        //console.log("Cookie : ", cookie);
         //Check if the cookie is present and has a token and handling the error if not present
         if (!cookie || !cookie.token) {
             throw new Error("No token found in cookies");
@@ -243,7 +243,7 @@ app.get("/profile", async (req, res) => {
         //Now verify the token and get the user id from it and then fetch the user from the DB
         //With the help of JWT verify method we can decode the token and get the user id from it and then fetch the user from the DB
         const decodedMsg = await jwt.verify(cookie.token, "mysecretkey");
-        console.log("Decoded Msg : ", decodedMsg);
+        //console.log("Decoded Msg : ", decodedMsg);
 
         const user = await User.findById(decodedMsg._id);
 
@@ -253,7 +253,7 @@ app.get("/profile", async (req, res) => {
         }
 
         res.send(user);
-        
+
     } catch (err) {
         console.error("Error saving user:", err.message);
         res.status(400).send('ERROR : ' + err.message);
