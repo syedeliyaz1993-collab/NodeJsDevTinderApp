@@ -206,7 +206,7 @@ app.post("/login", async (req, res) => {
         }
 
         //Now decrypt the password and check if it matches with the password in DB
-        const isPasswordMatch = await isUserExist.validatePassword(password); // Call the instance method to validate the password
+        const isPasswordMatch = await isUseExist.validatePassword(password); // Call the instance method to validate the password
         if (isPasswordMatch) {
 
             const jwtToken = await isUseExist.getJWT();
