@@ -28,7 +28,9 @@ connectionRequestSchema.pre("save", function () {
         throw new Error("You cannot send conenction request to yourself !")
     }
 })
-
+//1 is Ascending Order -1 is Descending order
+//Compunding index
+connectionRequestSchema.index({ fromUserId: 1, toUserId: 1 });
 const connectionRequest = mongoose.model("connectionRequest", connectionRequestSchema);
 
 module.exports = connectionRequest;
