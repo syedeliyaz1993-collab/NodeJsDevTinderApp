@@ -15,6 +15,19 @@ const validateSignUpData = (req) => {
     }
 
     //validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }))
+};
+
+const validateProfileEditData = (req, res) => {
+
+    const allowedEditFields = ["firstName", "lastName", "emailId", "skills", "age", "gender"];
+
+    const isEditAllowed = Object.keys(req.body).every(f => allowedEditFields.includes(f));
+
+    return isEditAllowed;
+
+
+
+
 }
 
-module.exports = { validateSignUpData };
+module.exports = { validateSignUpData, validateProfileEditData };

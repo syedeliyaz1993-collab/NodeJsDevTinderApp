@@ -158,136 +158,66 @@ const app = express();
 // });
 
 const connectDB = require("./config/database");
-const User = require("./models/user");
-const { validateSignUpData } = require("./utils/validation");
-const bcrypt = require("bcrypt");
 
 app.use(express.json()); // Middleware to parse JSON request bodies
-app.post("/signUp", async (req, res) => {
-    validateSignUpData(req); // Validate the incoming request data
-    //encrpt the paassword before saving to the database
-
-    const { firstName, lastName, emailId, password } = req.body;
-
-    const passwordHash = await bcrypt.hash(password, 10); // Hash the password using bcrypt with a salt round of 10
-
-
-
-
-
-    //Create a new instance for USer model & Now send the fields to User Model Instead
-    //Of sending req.body directly
-    const user = new User({ firstName, lastName, emailId, password: passwordHash }); // Create a new user instance with the hashed password
-
-
-    //Always use try & catch for handling DB operations as they are async in nature and can throw errors
-    try {
-        await user.save(); // Save the user to the database  
-        res.send("User signed up successfully");
-    } catch (err) {
-        console.error("Error saving user:", err.message);
-        res.status(400).send('ERROR : ' + err.message);
-    }
-});
-
-///Login API 
-
-const jwt = require("jsonwebtoken");
-app.post("/login", async (req, res) => {
-
-    try {
-        //Get the user credentails which they trued to enter to login 
-
-        const { emailId, password } = req.body;
-        //Now check the email is exist in our DB 
-        const isUseExist = await User.findOne({ emailId: emailId });
-        if (!isUseExist) {
-            throw new Error("User not found with the provided emailId");
-        }
-
-        //Now decrypt the password and check if it matches with the password in DB
-        const isPasswordMatch = await isUseExist.validatePassword(password); // Call the instance method to validate the password
-        if (isPasswordMatch) {
-
-            const jwtToken = await isUseExist.getJWT();
-
-            res.cookie("token", jwtToken); // Seting  a Dynamic cookie named "token"
-
-            res.send("User logged in successfully");
-        } else {
-            throw new Error("Invalid password");
-        }
-
-
-    } catch (err) {
-        console.error("Error saving user:", err.message);
-        res.status(400).send('ERROR : ' + err.message);
-    }
-
-});
 
 const cookieParser = require("cookie-parser");
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
+
 app.use(cookieParser()); // Middleware to parse cookies from incoming requests
-const { userAuth } = require("./middlewares/Auth");
-app.get("/profile", userAuth, async (req, res) => {
-    try {
-        const user = req.user; // Access the authenticated user from the request object
-        res.send(user);
-
-    } catch (err) {
-        console.error("Error saving user:", err.message);
-        res.status(400).send('ERROR : ' + err.message);
-    }
-});
-
-app.post("/sendConnectionRequest", userAuth, async (req, res) => {
-    const user = req.user; // Access the authenticated user from the request object
-
-    res.send(user.firstName + " " + "Sent Connection request sent successfully");
-});
-
-
 
 //Get the user with emailId from the database and send them as a JSON response
-app.get("/users", async (req, res) => {
+// app.get("/users", async (req, res) => {
 
-    const userEmailId = req.body.emailId;
-    try {
-        const users = await User.find({ emailId: userEmailId }); // Fetch users from the database based on emailId
-        if (users.length === 0) {
-            return res.status(404).send("No users found with the provided emailId");
-        }
-        res.json(users); // Send the fetched users as a JSON response
-    } catch (err) {
-        console.error("Error fetching users:", err.message);
-        res.status(500).send("Error fetching users");
-    }
-});
+//     const userEmailId = req.body.emailId;
+//     try {
+//         const users = await User.find({ emailId: userEmailId }); // Fetch users from the database based on emailId
+//         if (users.length === 0) {
+//             return res.status(404).send("No users found with the provided emailId");
+//         }
+//         res.json(users); // Send the fetched users as a JSON response
+//     } catch (err) {
+//         console.error("Error fetching users:", err.message);
+//         res.status(500).send("Error fetching users");
+//     }
+// });
 
 //Get all users from the database and send them as a JSON response
-app.get("/feed", async (req, res) => {
-    try {
-        const users = await User.find(); // Fetch all users from the database   
-        res.json(users); // Send the fetched users as a JSON response   
-    } catch (err) {
-        console.error("Error fetching users:", err.message);
-        res.status(500).send("Error fetching users");
-    }
-});
+// app.get("/feed", async (req, res) => {
+//     try {
+//         const users = await User.find(); // Fetch all users from the database   
+//         res.json(users); // Send the fetched users as a JSON response   
+//     } catch (err) {
+//         console.error("Error fetching users:", err.message);
+//         res.status(500).send("Error fetching users");
+//     }
+// });
 
-app.delete("/deleteUser", async (req, res) => {
-    const userId = req.body.userId;
-    try {
-        const deletedUser = await User.findByIdAndDelete(userId); // Delete the user from the database based on userId
-        if (!deletedUser) {
-            return res.status(404).send("User not found");
-        }
-        res.send("User deleted successfully");
-    } catch (err) {
-        console.error("Error deleting user:", err.message);
-        res.status(500).send("Error deleting user");
-    }
-});
+// app.delete("/deleteUser", async (req, res) => {
+//     const userId = req.body.userId;
+//     try {
+//         const deletedUser = await User.findByIdAndDelete(userId); // Delete the user from the database based on userId
+//         if (!deletedUser) {
+//             return res.status(404).send("User not found");
+//         }
+//         res.send("User deleted successfully");
+//     } catch (err) {
+//         console.error("Error deleting user:", err.message);
+//         res.status(500).send("Error deleting user");
+//     }
+// });
+
+
+
+/**
+ * ALWAYS KEEP APP.JS FILE VERY CLEAN
+ */
+
+app.use('/', authRouter);
+app.use('/', profileRouter);
+app.use('/', requestRouter)
 
 //Exported and Imported the ConnectDB fn
 //At first it connect to Db
