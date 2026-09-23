@@ -2,13 +2,13 @@ const validator = require('validator');
 
 const validateSignUpData = (req) => {
 
-    const {firstName, lastName, emailId, password, age, gender, skills} = req.body;
+    const { firstName, lastName, emailId, password, age, gender, skills } = req.body;
 
-    if(!firstName || !lastName) {
+    if (!firstName || !lastName) {
         throw new Error("First name and last name are required");
-    } else if(firstName.length < 3 || firstName.length > 30) {
+    } else if (firstName.length < 3 || firstName.length > 30) {
         throw new Error("First name must be between 3 and 30 characters");
-    } else if(!validator.isEmail(emailId)) {
+    } else if (!validator.isEmail(emailId)) {
         throw new Error("Invalid email address");
     } else if (!validator.isStrongPassword(password)) {
         throw new Error("Password must be at least 8 characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol");
@@ -24,10 +24,13 @@ const validateProfileEditData = (req, res) => {
     const isEditAllowed = Object.keys(req.body).every(f => allowedEditFields.includes(f));
 
     return isEditAllowed;
-
-
-
-
 }
 
-module.exports = { validateSignUpData, validateProfileEditData };
+const validateForgotPassword = (req, res) => {
+    const isAllowedField = ["emailId", "password"];
+    const isEditAllowed = Object.keys(req.body).every(f => isAllowedField.includes(f));
+
+    return isEditAllowed;
+}
+
+module.exports = { validateSignUpData, validateProfileEditData, validateForgotPassword };
