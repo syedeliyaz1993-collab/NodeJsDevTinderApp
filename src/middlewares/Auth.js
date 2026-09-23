@@ -34,7 +34,7 @@ const User = require("../models/user");
 const userAuth = async (req, res, next) => {
     try {
         const token = req.cookies.token; // Assuming the token is stored in a cookie named "token"
-        console.log("Token from cookie:", token); // Log the token for debugging
+        //console.log("Token from cookie:", token); // Log the token for debugging
         if (!token) {
             throw new Error("Invalid Token, Please login again");
         }
