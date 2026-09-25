@@ -165,6 +165,7 @@ const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
+const userRouter = require('./routes/user');
 
 app.use(cookieParser()); // Middleware to parse cookies from incoming requests
 
@@ -217,7 +218,8 @@ app.use(cookieParser()); // Middleware to parse cookies from incoming requests
 
 app.use('/', authRouter);
 app.use('/', profileRouter);
-app.use('/', requestRouter)
+app.use('/', requestRouter);
+app.use('/', userRouter);
 
 //Exported and Imported the ConnectDB fn
 //At first it connect to Db
