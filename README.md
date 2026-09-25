@@ -15,8 +15,14 @@ PATCH - /profile/password
 
 POST - /request/send/Intrested/:userId
 POSt - /request/send/Ignored/:userId
+//Instead above
+POST - /request/send/status/:toUserId
+
 POST - /request/review/accepted/:requestId
 POSt - /request/review/rejected/:requestId
+
+//Instead above 
+POST - /request/review/status/:requestId
 
 ## userRouter
 
