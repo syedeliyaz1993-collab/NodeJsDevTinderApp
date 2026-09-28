@@ -33,10 +33,10 @@ const User = require("../models/user");
 
 const userAuth = async (req, res, next) => {
     try {
-        const token = req.cookies.token; // Assuming the token is stored in a cookie named "token"
+        const token = req.cookies?.token; // Assuming the token is stored in a cookie named "token"
         //console.log("Token from cookie:", token); // Log the token for debugging
         if (!token) {
-            throw new Error("Invalid Token, Please login again");
+            return res.status(400).send("Invalid Token, Please login again");
         }
         const decoded = await jwt.verify(token, "mysecretkey");
         const user = await User.findById(decoded._id);
