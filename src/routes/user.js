@@ -31,8 +31,11 @@ userRouter.get('/user/request/received', userAuth, async (req, res) => {
 
 userRouter.get('/user/connections', userAuth, async (req, res) => {
 
+    // userAuth adds the authenticated user's document to req.user.
     const loggedInUser = req.user;
 
+    // Find accepted requests where the logged-in user is either the sender or recipient.
+    // Populate both user references with only their first and last names.
     const findAllMyConnectionReq = await connectionRequest.find({
         $or: [{ fromUserId: loggedInUser._id, status: "accepted" },
         { toUserId: loggedInUser._id, status: "accepted" }
@@ -40,7 +43,7 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
     }).populate('fromUserId', UserCollectionData).populate('toUserId', UserCollectionData);
 
 
-
+    // Return the other person from each accepted request, not the logged-in user.
     const finalData = findAllMyConnectionReq.map((row) => {
         if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
             return row.toUserId;
@@ -49,6 +52,7 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
         return row.fromUserId;
     });
 
+    // Send the list of connected users to the client.
     res.send({ message: "Fetched All Data Connections", finalData });
 
 });
