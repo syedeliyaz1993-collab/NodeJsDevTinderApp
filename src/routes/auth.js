@@ -6,68 +6,76 @@ const { validateSignUpData } = require("../utils/validation");
 const authRouter = express.Router();
 
 authRouter.post("/signUp", async (req, res) => {
-
-    validateSignUpData(req); // Validate the incoming request data
-    //encrpt the paassword before saving to the database
-
-    const { firstName, lastName, emailId, password } = req.body;
-
-    const passwordHash = await bcrypt.hash(password, 10); // Hash the password using bcrypt with a salt round of 10
-
-    //Create a new instance for USer model & Now send the fields to User Model Instead
-    //Of sending req.body directly
-    const user = new User({ firstName, lastName, emailId, password: passwordHash }); // Create a new user instance with the hashed password
-
-
-    //Always use try & catch for handling DB operations as they are async in nature and can throw errors
     try {
-        await user.save(); // Save the user to the database  
-        res.send("User signed up successfully");
+        validateSignUpData(req); // Validate the incoming request data
+
+        const { firstName, lastName, emailId, password } = req.body;
+
+        const passwordHash = await bcrypt.hash(password, 10); // Hash the password using bcrypt with a salt round of 10
+
+        const user = new User({ firstName, lastName, emailId, password: passwordHash });
+
+        await user.save();
+
+        return res.status(201).json({
+            success: true,
+            message: "User signed up successfully",
+            data: { userId: user._id, firstName: user.firstName, emailId: user.emailId }
+        });
     } catch (err) {
         console.error("Error saving user:", err.message);
-        res.status(400).send('ERROR : ' + err.message);
+        return res.status(400).json({
+            success: false,
+            message: err.message || "Signup failed"
+        });
     }
 });
 
 authRouter.post("/login", async (req, res) => {
-
     try {
-        //Get the user credentails which they trued to enter to login 
-
         const { emailId, password } = req.body;
-        //Now check the email is exist in our DB 
-        const isUseExist = await User.findOne({ emailId: emailId });
-        if (!isUseExist) {
+
+        const isUserExist = await User.findOne({ emailId: emailId });
+        if (!isUserExist) {
             throw new Error("User not found with the provided emailId");
         }
 
-        //Now decrypt the password and check if it matches with the password in DB
-        const isPasswordMatch = await isUseExist.validatePassword(password); // Call the instance method to validate the password
-        if (isPasswordMatch) {
-
-            const jwtToken = await isUseExist.getJWT();
-
-            res.cookie("token", jwtToken); // Seting  a Dynamic cookie named "token"
-
-            res.send({"message":"User logged in successfully", isUseExist});
-        } else {
+        const isPasswordMatch = await isUserExist.validatePassword(password);
+        if (!isPasswordMatch) {
             throw new Error("Invalid password");
         }
 
+        const jwtToken = await isUserExist.getJWT();
+        res.cookie("token", jwtToken);
 
+        return res.status(200).json({
+            success: true,
+            message: "User logged in successfully",
+            data: isUserExist
+        });
     } catch (err) {
         console.error("Error saving user:", err.message);
-        res.status(400).send('ERROR : ' + err.message);
+        return res.status(400).json({
+            success: false,
+            message: err.message || "Login failed"
+        });
     }
-
 });
 
 
 authRouter.post("/logout", (req, res) => {
-
-    res.clearCookie('token');
-
-    res.send('Logout Successfully');
+    try {
+        res.clearCookie('token');
+        return res.status(200).json({
+            success: true,
+            message: "Logout Successfully"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            message: err.message || "Logout failed"
+        });
+    }
 });
 
 

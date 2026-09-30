@@ -18,81 +18,93 @@ userRouter.get('/user/request/received', userAuth, async (req, res) => {
             toUserId: loggedInUser._id
         }).populate("fromUserId", UserCollectionData);
 
-        const data = findAllRequestReceivedToUser;
-        res.send({ message: "Data fetched succesfully", data });
+        return res.status(200).json({
+            success: true,
+            message: "Data fetched succesfully",
+            data: findAllRequestReceivedToUser
+        });
 
 
 
 
     } catch (err) {
-        res.status(400).send('ERROR : ' + err.message);
+        return res.status(400).json({
+            success: false,
+            message: err.message || "Failed to fetch received requests"
+        });
     }
 });
 
 userRouter.get('/user/connections', userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
 
-    // userAuth adds the authenticated user's document to req.user.
-    const loggedInUser = req.user;
+        const findAllMyConnectionReq = await connectionRequest.find({
+            $or: [{ fromUserId: loggedInUser._id, status: "accepted" },
+            { toUserId: loggedInUser._id, status: "accepted" }
+            ]
+        }).populate('fromUserId', UserCollectionData).populate('toUserId', UserCollectionData);
 
-    // Find accepted requests where the logged-in user is either the sender or recipient.
-    // Populate both user references with only their first and last names.
-    const findAllMyConnectionReq = await connectionRequest.find({
-        $or: [{ fromUserId: loggedInUser._id, status: "accepted" },
-        { toUserId: loggedInUser._id, status: "accepted" }
-        ]
-    }).populate('fromUserId', UserCollectionData).populate('toUserId', UserCollectionData);
+        const finalData = findAllMyConnectionReq.map((row) => {
+            if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
+                return row.toUserId;
+            }
 
+            return row.fromUserId;
+        });
 
-    // Return the other person from each accepted request, not the logged-in user.
-    const finalData = findAllMyConnectionReq.map((row) => {
-        if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
-            return row.toUserId;
-        }
-
-        return row.fromUserId;
-    });
-
-    // Send the list of connected users to the client.
-    res.send({ message: "Fetched All Data Connections", finalData });
-
+        return res.status(200).json({
+            success: true,
+            message: "Fetched All Data Connections",
+            data: finalData
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            message: err.message || "Failed to fetch connections"
+        });
+    }
 });
 
 userRouter.get("/users/feed", userAuth, async (req, res) => {
+    try {
+        const loginUser = req.user;
+        const skip = Number(req.query.page) || 0;
+        let limit = Number(req.query.limit) || 10;
+        limit = limit > 50 ? 50 : limit;
 
-    //Take the Login User
-    const loginUser = req.user;
-    //FInd all the connection my id will be in to or From 
-    const skip = req.query.page;
-    let limit = req.query.limit;
-    limit = limit > 50 ? 50 : limit;
+        const findConnectionReq = await connectionRequest.find({
+            $or: [
+                { toUserId: loginUser._id },
+                { fromUserId: loginUser._id }
+            ]
+        }).select("fromUserId toUserId");
 
-    const findConnectionReq = await connectionRequest.find({
-        $or: [
-            { toUserId: loginUser._id },
-            { fromUserId: loginUser._id }
-        ]
-    }).select("fromUserId toUserId");
+        const hideUser = new Set();
 
-    const hideUser = new Set();
+        findConnectionReq.forEach(req => {
+            hideUser.add(req.fromUserId.toString());
+            hideUser.add(req.toUserId.toString());
+        });
 
-    findConnectionReq.forEach(req => {
-        hideUser.add(req.fromUserId.toString());
-        hideUser.add(req.toUserId.toString());
-    });
-    //Now remove hideUser & Self id in feed
-    //Means I who has sent connection and who has sent connection to me
+        const feedUser = await User.find({
+            $and: [
+                { _id: { $nin: Array.from(hideUser) } },
+                { _id: { $nin: loginUser._id } }
+            ]
+        }).select(UserCollectionData).skip(skip).limit(limit);
 
-    const feedUser = await User.find({
-        //Here we need to filter on 2 so using and query
-        $and: [
-            { _id: { $nin: Array.from(hideUser) } },
-            { _id: { $nin: loginUser._id } }
-        ]
-    }).select(UserCollectionData).skip(skip).limit(limit);
-
-    //
-
-    res.send(feedUser);
+        return res.status(200).json({
+            success: true,
+            message: "Feed fetched successfully",
+            data: feedUser
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            message: err.message || "Failed to fetch feed"
+        });
+    }
 });
 
 module.exports = userRouter;
