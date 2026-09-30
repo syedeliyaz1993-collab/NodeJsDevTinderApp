@@ -49,7 +49,7 @@ authRouter.post("/login", async (req, res) => {
 
             res.cookie("token", jwtToken); // Seting  a Dynamic cookie named "token"
 
-            res.send("User logged in successfully");
+            res.send({"message":"User logged in successfully", isUseExist});
         } else {
             throw new Error("Invalid password");
         }
@@ -65,7 +65,7 @@ authRouter.post("/login", async (req, res) => {
 
 authRouter.post("/logout", (req, res) => {
 
-    res.cookie('token', null, { expiresIn: Date.now() });
+    res.clearCookie('token');
 
     res.send('Logout Successfully');
 });

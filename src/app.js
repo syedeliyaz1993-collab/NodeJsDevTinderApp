@@ -166,6 +166,7 @@ const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require('./routes/user');
+const cors = require('cors')
 
 app.use(cookieParser()); // Middleware to parse cookies from incoming requests
 
@@ -215,7 +216,10 @@ app.use(cookieParser()); // Middleware to parse cookies from incoming requests
 /**
  * ALWAYS KEEP APP.JS FILE VERY CLEAN
  */
-
+app.use(cors({
+    origin : "http://localhost:5173",
+    credentials : true
+}))
 app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/', requestRouter);

@@ -33,10 +33,10 @@ const User = require("../models/user");
 
 const userAuth = async (req, res, next) => {
     try {
-        const token = req.cookies?.token; // Assuming the token is stored in a cookie named "token"
+        const token = req?.cookies?.token; // Assuming the token is stored in a cookie named "token"
         //console.log("Token from cookie:", token); // Log the token for debugging
         if (!token) {
-            return res.status(400).send("Invalid Token, Please login again");
+            return res.status(401).send("Invalid Token, Please login again");
         }
         const decoded = await jwt.verify(token, "mysecretkey");
         const user = await User.findById(decoded._id);
@@ -47,7 +47,7 @@ const userAuth = async (req, res, next) => {
         req.user = user;
         next();
     } catch (err) {
-        res.status(400).send('ERROR : ' + err.message);
+        res.status(401).send('ERROR : ' + err.message);
     }
 };
 
