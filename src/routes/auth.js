@@ -9,18 +9,18 @@ authRouter.post("/signUp", async (req, res) => {
     try {
         validateSignUpData(req); // Validate the incoming request data
 
-        const { firstName, lastName, emailId, password } = req.body;
+        const { firstName, lastName, emailId, password, age, gender, skills, about } = req.body;
 
         const passwordHash = await bcrypt.hash(password, 10); // Hash the password using bcrypt with a salt round of 10
 
-        const user = new User({ firstName, lastName, emailId, password: passwordHash });
+        const user = new User({ firstName, lastName, emailId, password: passwordHash, age, gender, skills, about });
 
         await user.save();
 
         return res.status(201).json({
             success: true,
             message: "User signed up successfully",
-            data: { userId: user._id, firstName: user.firstName, emailId: user.emailId }
+            data: user
         });
     } catch (err) {
         console.error("Error saving user:", err.message);
@@ -37,12 +37,18 @@ authRouter.post("/login", async (req, res) => {
 
         const isUserExist = await User.findOne({ emailId: emailId });
         if (!isUserExist) {
-            throw new Error("User not found with the provided emailId");
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
+            });
         }
 
         const isPasswordMatch = await isUserExist.validatePassword(password);
         if (!isPasswordMatch) {
-            throw new Error("Invalid password");
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
+            });
         }
 
         const jwtToken = await isUserExist.getJWT();
@@ -55,7 +61,7 @@ authRouter.post("/login", async (req, res) => {
         });
     } catch (err) {
         console.error("Error saving user:", err.message);
-        return res.status(400).json({
+        return res.status(401).json({
             success: false,
             message: err.message || "Login failed"
         });
